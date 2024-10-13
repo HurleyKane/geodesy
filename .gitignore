@@ -1,0 +1,11 @@
+*
+!*.py
+!.gitignore
+!*.pyd
+!*.ipynb
+!*.md
+!conda-environment.yml
+!requirements.txt
+# 不忽略子目录
+!*/
+/.idea
