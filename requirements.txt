@@ -5,6 +5,5 @@ xarray
 scipy
 utm
 pyproj
-windows-curses
-#  @wraps(func) 需要一个Windows上的依赖
+# windows-curses #  @wraps(func) 需要一个Windows上的依赖
 

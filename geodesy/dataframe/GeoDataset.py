@@ -196,7 +196,7 @@ class GeoDataset(Dataset):
                 data_vars[data.columns[i]] = (["clat", "clon"], df2[data.columns[i]])
         dataset = Dataset(data_vars=data_vars,
                              coords={
-                                 "clon": (["clon"], df2.lon.columns.values),
+                                 "clon": (["clon"], df2.lon.strike_slip_segments_columns.values),
                                  "clat": (["clat"], df2.lon.index.values)
                              }
                              )

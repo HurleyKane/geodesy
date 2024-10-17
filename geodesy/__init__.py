@@ -1,3 +1,5 @@
 from geodesy.algorithm import *
 from geodesy.dataframe import *
-from geodesy.config import *
+from geodesy.plotting import *
+from geodesy import config
+from geodesy.earthquake import *
