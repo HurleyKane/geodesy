@@ -5,12 +5,12 @@ from __future__ import annotations
 import re
 import json, pickle
 import numpy as np
-from sklearn.cluster import KMeans
 from piecewise_regression.main import Fit
 from matplotlib.widgets import Button
 import matplotlib.pyplot as plt
-import sympy as sp
 from geodesy.earthquake.FaultLines import FaultLines
+import sympy as sp
+
 
 def polyline_expression():
     # 初始化 LaTeX 打印
@@ -383,6 +383,7 @@ class faultLinesfit:
         ) -> dict[str, FaultLines]:
         KB = self.lines.getKB()
         ## 利用kmeans算法对线段进行分类
+        from sklearn.cluster import KMeans
         kmeans = KMeans(n_clusters=self.pointTypeNum)
         kmeans.fit(KB)
         labels = np.array(kmeans.labels_)

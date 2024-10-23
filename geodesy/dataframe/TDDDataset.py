@@ -9,6 +9,7 @@ from xarray.core.types import DataVars
 from collections.abc import Mapping
 from typing import Any
 
+
 class TDDDataset(GeoDataset):
     __slots__ = ("_initial_mark", "_dataset", "_region", "_fitting_accuracy", "_columns", "_clon", "_clat")
     def __init__(

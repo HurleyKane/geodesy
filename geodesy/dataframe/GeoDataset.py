@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import utm
+import xarray as xr
 import pandas as pd
 import numpy as np
 import logging
@@ -14,6 +15,7 @@ from collections.abc import (
     Iterable
 )
 
+from tqdm import tqdm
 from xarray import Dataset, open_dataset
 from xarray.core.types import DataVars
 from xarray.core.types import Self
@@ -149,6 +151,12 @@ class GeoDataset(Dataset):
         return cls(ld(filename_or_obj, **kwargs))
 
     @classmethod
+    def open_dataset(cls, filename:str):
+        dataset = open_dataset(filename)
+        return cls(dataset)
+
+
+    @classmethod
     def create_empty_obj(cls, clon, clat, attributes:tuple=("ele",)):
         ds = Dataset()
         ds.assign_coords(clon=("clon", clon), lat=("clat", clat))
@@ -167,11 +175,6 @@ class GeoDataset(Dataset):
         results = np.stack(results).T
         with open(filename, "w") as f:
             np.savetxt(f, results, fmt=fmt, delimiter=" ")
-
-    @classmethod
-    def open_dataset(cls, filename:str):
-        dataset = open_dataset(filename)
-        return cls(dataset)
 
     @classmethod
     def creat_from_numpy_or_pandas(cls, data: pd.DataFrame or np.ndarray, columns:list | None= None):
@@ -208,7 +211,17 @@ class GeoDataset(Dataset):
         return GeoDataset.creat_from_numpy_or_pandas(df, columns)
 
     @classmethod
-    def __interp_dataset(cls, dataset:Dataset, region, fitting_accuracy, method="nearest"):
+    def read_tiff(cls, filename:str):
+        from geodesy.io import read_tiff
+        return cls(read_tiff(filename))
+
+    @classmethod
+    def read_tiffs(cls, filenames:list[str], properties_name:list[list[str]]=None):
+        from geodesy.io import read_tiffs
+        return cls(read_tiffs(filenames, properties_name=properties_name))
+
+    @classmethod
+    def _interp_dataset(cls, dataset:Dataset, region, fitting_accuracy, method="nearest")->GeoDataset:
         """
         method : {"linear", "nearest", "zero", "slinear", "quadratic", "cubic", "polynomial",
                   "barycentric", "krog", "pchip", "spline", "akima"}, default: "linear"
@@ -219,7 +232,8 @@ class GeoDataset(Dataset):
         return cls(interp_dataset)
 
     def interp_dataset(self, region, fitting_accuracy, method="nearest"):
-        return self.__interp_dataset(self, region, fitting_accuracy, method=method)
+        return self._interp_dataset(self, region, fitting_accuracy, method=method)
+
 
     @classmethod
     def _downsampling(cls, dataset:GeoDataset, step=2) -> GeoDataset:

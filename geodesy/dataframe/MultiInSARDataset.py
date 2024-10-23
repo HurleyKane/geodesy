@@ -30,7 +30,7 @@ def interp(databases, coordinates, fitting_accuracy=None):
     for i in tqdm(range(len(databases)), desc="aligning dataset", ncols=100):
         interp_databases.append(
             InSARDataset.__interp_database(databases[i].dataset, coordinates=coordinates, fitting_accuracy=fitting_accuracy))
-    return MultiInSARDataset.create_from_databases(databases=interp_databases)
+    return MultiInSARDataset.create_from_databases(datasets=interp_databases)
 
 class MultiInSARDataset(InSARDataset):
     __slots__ = ("_ele")
@@ -44,7 +44,7 @@ class MultiInSARDataset(InSARDataset):
             attrs: Mapping[Any, Any] | None = None,
             select_vars: str | None = "para",
     ) -> None:
-        super().__init__(data_vars, coords, attrs)
+        super().__init__(data_vars, coords, attrs, select_vars)
 
     @property
     def ele(self):
@@ -69,7 +69,7 @@ class MultiInSARDataset(InSARDataset):
         return cls._load_dataset(filename_or_obj, **kwargs)
 
     @classmethod
-    def interp_databases(cls, databases:list[InSARDataset], coordinates, fitting_accuracy=None) -> MultiInSARDataset:
+    def interp_datasets(cls, datasets:list[InSARDataset], coordinates, fitting_accuracy=None) -> MultiInSARDataset:
         """
         确定研究区域内参与计算的点的值
         如果几个文件的坐标不统一则需要进行坐标的统一工作
@@ -80,9 +80,9 @@ class MultiInSARDataset(InSARDataset):
         """
         from geodesy.dataframe.InSARDataset import InSARDataset
         interp_databases = []
-        for i in tqdm(range(len(databases)), desc="aligning dataset", ncols=100):
-            interp_databases.append(InSARDataset.__interp_database(databases[i].dataset, coordinates=coordinates, fitting_accuracy=fitting_accuracy))
-        return cls.create_from_databases(databases=interp_databases)
+        for i in tqdm(range(len(datasets)), desc="aligning dataset", ncols=100):
+            interp_databases.append(InSARDataset.__interp_database(datasets[i].dataset, coordinates=coordinates, fitting_accuracy=fitting_accuracy))
+        return cls.create_from_databases(datasets=interp_databases)
 
     @classmethod
     def create_from_lltndes(cls, fnames:list, columns=None, region=None, fitting_accuracy=None):
@@ -90,27 +90,27 @@ class MultiInSARDataset(InSARDataset):
         for i in range(0, len(fnames)):
             databases.append(InSARDataset.create_from_txt(fnames[i], columns=columns,
                                                           region=region, fitting_accuracy=fitting_accuracy))
-        return cls.create_from_databases(databases=databases,
+        return cls.create_from_databases(datasets=databases,
                                          region=region, fitting_accuracy=fitting_accuracy)
 
     @classmethod
-    def create_from_databases(cls, databases:list, region=None, fitting_accuracy=None,
+    def create_from_databases(cls, datasets:list, region=None, fitting_accuracy=None,
                               select_vars="para"
                               ):
-        db_len = len(databases)
+        db_len = len(datasets)
         if region is None:
             lon0, lon1, lat0, lat1 = [], [], [], []
             for i in range(db_len):
-                lon0.append(databases[i].region[0])
-                lon1.append(databases[i].region[1])
-                lat0.append(databases[i].region[2])
-                lat1.append(databases[i].region[3])
+                lon0.append(datasets[i].region[0])
+                lon1.append(datasets[i].region[1])
+                lat0.append(datasets[i].region[2])
+                lat1.append(datasets[i].region[3])
             region = [min(lon0), max(lon1), min(lat0), max(lat1)]
 
         """判断是否对齐"""
         mark = True
-        clon, clat = databases[0].dataset.clon, databases[0].dataset.clat
-        for databse in databases:
+        clon, clat = datasets[0].dataset.clon, datasets[0].dataset.clat
+        for databse in datasets:
             try:
                 a = clon.values != databse.dataset.clon.values
                 b = clat.values != databse.dataset.clat.values
@@ -126,21 +126,21 @@ class MultiInSARDataset(InSARDataset):
         # 1. 根据region和fitting_accuracy进行对齐
         if mark == False:  # 没对齐
             if fitting_accuracy is None:
-                fitting_accuracy = round(databases[0].dataset.clon[1].values - databases[0].dataset.clon[0].values, 6)
-            interp_other = MultiInSARDataset.interp_databases(databases=databases, coordinates=region,
-                                                              fitting_accuracy=fitting_accuracy)
+                fitting_accuracy = round(datasets[0].dataset.clon[1].values - datasets[0].dataset.clon[0].values, 6)
+            interp_other = MultiInSARDataset.interp_datasets(datasets=datasets, coordinates=region,
+                                                             fitting_accuracy=fitting_accuracy)
             return cls(interp_other.dataset, select_vars=select_vars)
         else: # 对齐
             temp_datasets = []
-            for i in range(len(databases)):  # 添加新维度num,区分不同轨道下的值
-                temp_datasets.append(databases[i].dataset.assign_coords(num=[i]))
+            for i in range(len(datasets)):  # 添加新维度num,区分不同轨道下的值
+                temp_datasets.append(datasets[i].dataset.assign_coords(num=[i]))
             dataset = xr.concat(temp_datasets, dim="num").transpose("clat", "clon", "num")  # 维度重新排列
         # 2. 对齐后检查，fitting_accuracy是否正确
-        temp_fitting_accuracy = abs(databases[0].dataset.clon[0] - databases[0].dataset.clon[1]).data
+        temp_fitting_accuracy = abs(datasets[0].dataset.clon[0] - datasets[0].dataset.clon[1]).data
         if fitting_accuracy is None:
             fitting_accuracy = temp_fitting_accuracy
         if fitting_accuracy != temp_fitting_accuracy:
-            other = interp(databases, coordinates=region, fitting_accuracy=fitting_accuracy)
+            other = interp(datasets, coordinates=region, fitting_accuracy=fitting_accuracy)
             return cls(other.dataset)
         return cls(dataset)
 
@@ -153,7 +153,7 @@ class MultiInSARDataset(InSARDataset):
         for fname in fnames:
             temp_database = InSARDataset.load_txt(fname)
             databases.append(temp_database)
-        return cls.create_from_databases(databases=databases, region=region, fitting_accuracy=fitting_accuracy)
+        return cls.create_from_databases(datasets=databases, region=region, fitting_accuracy=fitting_accuracy)
 
     def get_WGS84_coords(self):
         return self.to_InSARData2Ds()[0].get_WGS84_coords()
