@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 import utm
-import xarray as xr
 import pandas as pd
 import numpy as np
 import logging
@@ -28,6 +27,7 @@ from matplotlib.image import AxesImage
 
 """自建库"""
 from geodesy.dataframe.GeoDataArray import GeoDataArray
+from geodesy.dataframe.BaseDataset import BaseDataset
 from geodesy.plotting.MatplotToGeoformat import add_shared_colorbar
 
 class GeoDataDatasetPlotAccessor:
@@ -88,14 +88,13 @@ class GeoDataDatasetPlotAccessor:
         plt.subplots_adjust(right=0.85)  # 右侧增加边距
         return objs
 
-class GeoDataset(Dataset):
+class GeoDataset(BaseDataset):
     """以经纬度为单位的二维数据的通用数据类"""
     __slots__ = ()
     necessary_coords = ["clon", "clat"]
     necessary_vars = []
     select_vars = []
 
-    plot = UncachedAccessor(DatasetPlotAccessor)
     geo_plot = UncachedAccessor(GeoDataDatasetPlotAccessor)
 
     def __init__(
@@ -163,18 +162,6 @@ class GeoDataset(Dataset):
         for attribute in attributes:
             ds[attribute] = ("clat", "clon"), np.full((len(clat), len(clon)), np.nan)
         return cls(ds)
-
-    def save_to_txt(self, filename, fmt="%.6f"):
-        results = []
-        lon, lat = self.get_WGS84_coords()
-        results.append(lon.ravel())
-        results.append(lat.ravel())
-        for var in self.data_vars.keys():
-            temp_var = self[var].values.ravel()
-            results.append(temp_var)
-        results = np.stack(results).T
-        with open(filename, "w") as f:
-            np.savetxt(f, results, fmt=fmt, delimiter=" ")
 
     @classmethod
     def creat_from_numpy_or_pandas(cls, data: pd.DataFrame or np.ndarray, columns:list | None= None):

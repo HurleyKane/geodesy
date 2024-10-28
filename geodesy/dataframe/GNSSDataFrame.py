@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from geodesy.dataframe.GeoDataFrame import GeoDataFrame
 
 class GNSSDataFrame(GeoDataFrame):
+    __slots__ = ()
     def __init__(self, data:np.ndarray or pd.DataFrame=None, columns:list=None):
         '''
         usercols:为选择数据列的列表：列表中的数据分应分别为lon,lat,ele,ew_deformation,ns_deformation,v_def,如果为None则默认数据
