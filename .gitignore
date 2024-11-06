@@ -2,6 +2,7 @@
 !*.py
 !.gitignore
 !*.pyd
+!*.cpp
 !*.ipynb
 !*.md
 !conda-environment.yml

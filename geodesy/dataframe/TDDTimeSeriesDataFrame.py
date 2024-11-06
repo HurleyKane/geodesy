@@ -14,3 +14,4 @@ class TDDTimeSeriesDataFrame(TimeSeriesDataFrame):
             copy = False,
     ) -> None:
         super().__init__(data, index, columns, dtype, copy)
+

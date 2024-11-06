@@ -12,9 +12,6 @@ import pandas as pd
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 from pandas._typing import Axes, IndexLabel, Axis, Level, IgnoreRaise
-from pandas.plotting import PlotAccessor
-
-from geodesy.dataframe.DataFrameCachedAccessor import DataFrameCachedAccessor
 
 class BaseDataFrame(DataFrame):
     neccessary_columns = None
