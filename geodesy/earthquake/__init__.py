@@ -10,7 +10,7 @@ __all__ =   [
     "FitLines",
     "FaultLines",
     "FitLine",
-    "getFaultLines",
+    "getfaultlines",
     "faultLinesfit",
     "FaultGeometry",
 ]

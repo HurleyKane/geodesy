@@ -6,7 +6,7 @@ from io import StringIO
 
 class FaultGeometry(DataFrame):
     # 定义列名
-    default_columns = ["no", "slip", "xs", "ys", "zs", "length", "width", "strike", "dip", "rake"]
+    default_columns = ["no", "slip", "lon", "lat", "depth", "length", "width", "strike", "dip", "rake"]
 
     def __init__(
             self,
@@ -29,24 +29,28 @@ class FaultGeometry(DataFrame):
         self.columns = FaultGeometry.default_columns
 
     @classmethod
-    def read_from_csv(cls, source, delimiter: str = " ", header=None):
+    def read_from_csv(cls, source, delimiter: str = " ", header=None, **kwargs):
         try:
             # 判断 source 是文件路径还是 StringIO 对象
             if isinstance(source, str) and os.path.isfile(source):
                 # 读取文件
-                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns)
+                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns, **kwargs)
             elif isinstance(source, str) and not os.path.isfile(source):
                 source = StringIO(source)
-                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns)
+                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns, **kwargs)
             elif isinstance(source, StringIO):
                 # 读取 StringIO 对象
-                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns)
+                dataframe = read_csv(source, delimiter=delimiter, header=header, names=cls.default_columns, **kwargs)
             else:
                 raise ValueError("Source must be a valid file path or a StringIO object")
         except Exception as e:
             raise IOError(f"Error reading source: {e}")
 
         return cls(data=dataframe)
+    # 转换为矩形坐标
+    def get_rectangle_coords(self):
+        pass
+
 
 if __name__ == "__main__":
     # 示例数据

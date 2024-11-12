@@ -3,7 +3,7 @@
 # pip install dist/geodesy.whl
 import setuptools
 
-VERSION = '0.0.0'
+VERSION = '0.0.1'
 package_name = f"geodesy"
 
 setuptools.setup(

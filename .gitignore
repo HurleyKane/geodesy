@@ -11,3 +11,15 @@
 !*/
 /.idea
 /build
+/geodesy/io/CN-faults/china-geospatial-data-GB2312/Changelog.md
+/geodesy/io/CN-faults/china-geospatial-data-UTF8/Changelog.md
+/geodesy/io/CN-faults/china-geospatial-data-GB2312/README.md
+/geodesy/io/CN-faults/china-geospatial-data-UTF8/README.md
+/geodesy/io/CN-faults/china-geospatial-data-GB2312/README-en.md
+/geodesy/io/CN-faults/china-geospatial-data-UTF8/README-en.md
+/datas/CN-faults/china-geospatial-data-GB2312/Changelog.md
+/datas/CN-faults/china-geospatial-data-UTF8/Changelog.md
+/datas/CN-faults/china-geospatial-data-GB2312/README.md
+/datas/CN-faults/china-geospatial-data-UTF8/README.md
+/datas/CN-faults/china-geospatial-data-GB2312/README-en.md
+/datas/CN-faults/china-geospatial-data-UTF8/README-en.md
